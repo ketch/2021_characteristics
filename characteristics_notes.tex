@@ -1,0 +1,115 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+%\usepackage[ngerman,english]{babel}
+\usepackage[hmargin=0.7in, vmargin=0.8in]{geometry}
+\usepackage[babel,german=quotes]{csquotes}
+\usepackage{subfig}
+\usepackage{graphicx}
+\usepackage[colorlinks=true,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{caption}
+%\usepackage{subcaption}
+\usepackage{amsmath}          % writing mathematical formulas
+\usepackage{amsthm}           % writing mathematical theorems 
+\usepackage{amssymb}          % writing mathematical symbols
+\usepackage{bm, amsfonts}     % writing bold mathematical symbols
+\usepackage{xcolor}
+\usepackage{fixmath}
+\usepackage{tikz}
+\usepackage{bm}
+\usepackage{makecell}
+\usepackage{mathdots}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+
+\begin{document}
+
+\title{Practical calculations for the path-integral approach to
+  solving the wave equation with continuously-varying coefficients}
+  
+\author{David I. Ketcheson}
+
+\maketitle
+
+To make things simple, we take
+\begin{align}
+x_0 & = 0 & x_+ & = 1 \\
+c(x) & = 1 & Z(x) & = e^{2x}.
+\end{align}
+Then $r(x)=1$, so all the integrals we need to compute are simply volumes
+of certain high-dimensional polyhedra.  These can be computed quickly using 
+Mathematica (for reasonable orders).  It is also convenient to reparameterize
+using $s=(t-1)/2$ for the transmission integrals (except $T_0$) and $s=t/2$
+for the reflection integrals.
+
+Some of the results are (we omit the zero case for s<0):
+\begin{align}
+T_0(t)/C_G & = 
+    \begin{cases} 0 & t<1  \\ 1 & t \ge 1.
+    \end{cases} \\
+T_2(s)/C_G & =
+    \begin{cases} \frac{1}{2}s(2-s) & 0<s<1  \\
+                    \frac{1}{2} & s \ge 1.
+    \end{cases} \\
+T_4(s)/C_G & =
+    \begin{cases} \frac{1}{12}s^2(3-s^2) & 0<s<1  \\
+                    \frac{1}{24}\left(5-(s-2)^4\right) & 1 < s < 2 \\
+                    \frac{5}{24} & s \ge 2.
+    \end{cases} \\
+T_6(s)/C_G & = 
+\begin{cases}
+ \frac{1}{720} \left(-5 s^6-6 s^5+15 s^4+20 s^3\right) & 0<s<1 \\
+ \frac{1}{720} \left(-4 s^6+24 s^5-15 s^4-180 s^3+465 s^2-366 s+100\right) & 1<s<2 \\
+ \frac{1}{720} \left(61-(s-3)^6\right) & 2<s\leq 3 \\
+ \frac{61}{720} & s>3 \\
+\end{cases}
+\end{align}
+We observe several things, some of which are easily proved:
+\begin{enumerate}
+    \item Each function $T_{2m}(s)/C_G$ is a piecewise polynomial of degree $2m$
+            with breakpoints at the integer values of $s$ and is constant for
+            $s$ outside $[0,m]$.
+    \item The value at $s=m$ is given by $A_{2m}/(2m!)$, where $A_j$ are the Euler
+            zigzag numbers.
+    \item The value on the interval $m-1<s<m$ is given by
+        $$
+            \frac{1}{(2m)!}\left(A_{2m} - (s-m)^{2m}\right).
+        $$
+    \item The function is continuous.  Moreover, at $s=m$ the first $2m-1$ derivatives are
+        continuous and the value of the $2m$th derivative is $-1$.  This completely
+        determines the last piecewise segment.
+    \item The function value at $s=m-1$ is $A_{2m-1}/(2m!)$.  Thus these functions
+        change very little between $s=m-1$ and $s=m$.
+    \item At $s=m-1$, the function and first $2m-2$ derivatives are continuous.  At $s=m-2$,
+            the function and first $2m-3$ derivatives are continuous.  At $s=m-j$, the
+            function and first $2m-j-1$ derivatives are continuous until at $s=0$
+            the function and first $m-1$ derivatives are continuous.
+    \item At $s=0$, the $m$th derivative is equal to $1/m!$.
+\end{enumerate}
+Evidently the degree of continuity at each node has to do with where in the
+chain of integrals we need to split things up into cases.
+The conditions just enumerated are enough to completely determine $T_0$ through $T_4$,
+but not quite $T_6$, and the constraint deficit will grow with $m$.  It would be nice
+to figure out how to compute these for arbitrary $m$, although from a practical point
+of view going up to $T_8$ may be more than enough.  My main proposed technique for
+getting further is to notice patterns and conjecture the answers.
+
+Things to do:
+\begin{itemize}
+    \item Confirm these results (and corresponding ones for reflection) by comparing with
+            PyClaw simulations.
+    \item Figure out whether these formulas can easily be adapted to work for arbitrary
+            variation in $Z(x)$ (possibly restricted to monotone functions).
+            That would make this a powerful computational tool (and much easier to use).
+    \item Figure out the best way to use this for more complicated (e.g. non-monotone,
+            periodic) impedance profiles.  The Green's functions are given by the 
+            derivatives of the functions above, so one approach is to convolve those.
+            Can we somehow get dispersion and Airy functions out of this?
+
+\end{itemize}
+
+
+%\bibliographystyle{plain}
+%\bibliography{refs}
+\end{document}
